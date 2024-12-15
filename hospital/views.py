@@ -35,6 +35,12 @@ from django.utils.html import strip_tags
 from django.views.decorators.csrf import csrf_exempt
 
 
+from PIL import Image
+from django.core.files.uploadedfile import UploadedFile
+from django.core.exceptions import ValidationError
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
 # Create your views here.
 @csrf_exempt
 def hospital_home(request):
@@ -241,52 +247,64 @@ def patient_dashboard(request):
 #     context = {'patient': patient, 'form': form}
 #     return render(request, 'profile-settings.html', context)
 
+
+def is_valid_image(file: UploadedFile) -> bool:
+    """Check if the uploaded file is a valid image."""
+    try:
+        # Try to open the image to verify it's valid
+        img = Image.open(file)
+        img.verify()  # Check if the image is corrupted
+        print(f"🖼️ Image uploaded successfully: {file.name}")
+        return True
+    except (IOError, ValidationError) as e:
+        print(f"❌ Invalid image file: {file.name} | Error: {str(e)}")
+        return False
+
 @csrf_exempt
 @login_required(login_url="login")
 def profile_settings(request):
     if request.user.is_patient:
-        # patient = Patient.objects.get(user_id=pk)
         patient = Patient.objects.get(user=request.user)
         old_featured_image = patient.featured_image
-        
+
         if request.method == 'GET':
             context = {'patient': patient}
             return render(request, 'profile-settings.html', context)
+
         elif request.method == 'POST':
+            featured_image = old_featured_image
+
+            # Check if an image was uploaded
             if 'featured_image' in request.FILES:
-                featured_image = request.FILES['featured_image']
-            else:
-                featured_image = old_featured_image
-                
-            name = request.POST.get('name')
-            dob = request.POST.get('dob')
-            age = request.POST.get('age')
-            blood_group = request.POST.get('blood_group')
-            phone_number = request.POST.get('phone_number')
-            address = request.POST.get('address')
-            weight = request.POST.get('weight')
-            nid = request.POST.get('nid')
-            history = request.POST.get('history')
-            
-            patient.name = name
-            patient.age = age
-            patient.phone_number = phone_number
-            patient.address = address
-            patient.blood_group = blood_group
-            patient.history = history
-            patient.dob = dob
-            patient.nid = nid
-            patient.weight=weight
+                uploaded_file = request.FILES['featured_image']
+                if is_valid_image(uploaded_file):
+                    featured_image = uploaded_file
+                else:
+                    messages.error(request, "Uploaded file is not a valid image. Please try again.")
+                    print(f"🚫 User uploaded an invalid file: {uploaded_file.name}")
+                    return redirect('profile-settings')
+
+            # Update patient details with POST data
+            patient.name = request.POST.get('name')
+            patient.dob = request.POST.get('dob')
+            patient.age = request.POST.get('age')
+            patient.blood_group = request.POST.get('blood_group')
+            patient.phone_number = request.POST.get('phone_number')
+            patient.address = request.POST.get('address')
+            patient.weight = request.POST.get('weight')
+            patient.nid = request.POST.get('nid')
+            patient.history = request.POST.get('history')
             patient.featured_image = featured_image
-            
+
+            # Save updated patient data
             patient.save()
-            
-            messages.success(request, 'Profile Settings Changed!')
-            
+            messages.success(request, 'Profile Settings Changed! 🎉')
+            print(f"✅ Profile updated successfully for user: {request.user.username}")
             return redirect('patient-dashboard')
+
     else:
-        redirect('logout')  
-        
+        print(f"⚠️ Unauthorized access attempt by user: {request.user.username}")
+        return redirect('logout')     
 @csrf_exempt
 @login_required(login_url="login")
 def search(request):

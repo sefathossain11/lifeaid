@@ -24,12 +24,12 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = User
-        # Include other fields as necessary
         fields = ['username', 'email', 'password1', 'password2']
 
     def __init__(self, *args, **kwargs):
         super(CustomUserCreationForm, self).__init__(*args, **kwargs)
 
+        # Adding Bootstrap classes for styling
         for name, field in self.fields.items():
             field.widget.attrs.update({'class': 'form-control floating'})
 
@@ -37,9 +37,6 @@ class CustomUserCreationForm(UserCreationForm):
         username = self.cleaned_data.get('username')
 
         # Define the desired username pattern
-        # - Must start with a letter
-        # - Can contain letters, numbers, and underscores
-        # - Length between 5 to 30 characters
         pattern = r'^[A-Za-z][A-Za-z0-9_]{4,29}$'
 
         if not re.match(pattern, username):
@@ -53,6 +50,14 @@ class CustomUserCreationForm(UserCreationForm):
 
         return username
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+
+        # Check if email already exists
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("A user with that email already exists. Please use a different email address.")
+        
+        return email
 
 class PatientForm(forms.ModelForm):
     class Meta:

@@ -37,6 +37,12 @@ from xhtml2pdf import pisa
 from .models import Report
 from django.views.decorators.csrf import csrf_exempt
 
+
+from PIL import Image
+from django.core.files.uploadedfile import UploadedFile
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
 # Create your views here.
 
 def generate_random_string():
@@ -317,81 +323,97 @@ def delete_experience(request, pk):
         messages.success(request, 'Experience Deleted')
         return redirect('doctor-profile-settings')
       
+def is_valid_image(file: UploadedFile) -> bool:
+    """Check if the uploaded file is a valid image."""
+    try:
+        img = Image.open(file)
+        img.verify()  # Ensure the image is valid
+        print(f"🖼️ Image uploaded successfully: {file.name}")
+        return True
+    except (IOError, Exception) as e:
+        print(f"❌ Invalid image file: {file.name} | Error: {str(e)}")
+        return False
+    
 @csrf_exempt      
 @login_required(login_url="doctor-login")
 def doctor_profile_settings(request):
-    # profile_Settings.js
     if request.user.is_doctor:
         doctor = Doctor_Information.objects.get(user=request.user)
         old_featured_image = doctor.featured_image
-        
 
         if request.method == 'GET':
             educations = Education.objects.filter(doctor=doctor)
             experiences = Experience.objects.filter(doctor=doctor)
-                    
+            
             context = {'doctor': doctor, 'educations': educations, 'experiences': experiences}
             return render(request, 'doctor-profile-settings.html', context)
+
         elif request.method == 'POST':
+            featured_image = old_featured_image
+
             if 'featured_image' in request.FILES:
-                featured_image = request.FILES['featured_image']
-            else:
-                featured_image = old_featured_image
-                
-            name = request.POST.get('name')
-            number = request.POST.get('number')
-            gender = request.POST.get('gender')
-            dob = request.POST.get('dob')
-            description = request.POST.get('description')
-            consultation_fee = request.POST.get('consultation_fee')
-            report_fee = request.POST.get('report_fee')
-            nid = request.POST.get('nid')
-            visit_hour = request.POST.get('visit_hour')
+                uploaded_file = request.FILES['featured_image']
+                if is_valid_image(uploaded_file):
+                    featured_image = uploaded_file
+                else:
+                    messages.error(request, "Uploaded file is not a valid image. Please try again.")
+                    print(f"🚫 User uploaded an invalid file: {uploaded_file.name}")
+                    return redirect('doctor-profile-settings')
+
+            # Update doctor's main information
+            doctor.name = request.POST.get('name')
+            doctor.phone_number = request.POST.get('number')
+            doctor.gender = request.POST.get('gender')
+            doctor.dob = request.POST.get('dob')
+            doctor.description = request.POST.get('description')
+            doctor.consultation_fee = request.POST.get('consultation_fee')
+            doctor.report_fee = request.POST.get('report_fee')
+            doctor.nid = request.POST.get('nid')
+            doctor.visiting_hour = request.POST.get('visit_hour')
+            doctor.featured_image = featured_image
+            doctor.save()
             
+            print(f"✅ Doctor profile updated successfully for user: {request.user.username}")
+
+            # Update Education
             degree = request.POST.getlist('degree')
             institute = request.POST.getlist('institute')
             year_complete = request.POST.getlist('year_complete')
-            hospital_name = request.POST.getlist('hospital_name')     
-            start_year= request.POST.getlist('from')
+
+            Education.objects.filter(doctor=doctor).delete()
+            for i in range(len(degree)):
+                education = Education(
+                    doctor=doctor,
+                    degree=degree[i],
+                    institute=institute[i],
+                    year_of_completion=year_complete[i]
+                )
+                education.save()
+            print(f"📚 Education details updated for doctor: {request.user.username}")
+
+            # Update Experience
+            hospital_name = request.POST.getlist('hospital_name')
+            start_year = request.POST.getlist('from')
             end_year = request.POST.getlist('to')
             designation = request.POST.getlist('designation')
 
-            doctor.name = name
-            doctor.visiting_hour = visit_hour
-            doctor.nid = nid
-            doctor.gender = gender
-            doctor.featured_image = featured_image
-            doctor.phone_number = number
-            #doctor.visiting_hour
-            doctor.consultation_fee = consultation_fee
-            doctor.report_fee = report_fee
-            doctor.description = description
-            doctor.dob = dob
-            
-            doctor.save()
-            
-            # Education
-            for i in range(len(degree)):
-                education = Education(doctor=doctor)
-                education.degree = degree[i]
-                education.institute = institute[i]
-                education.year_of_completion = year_complete[i]
-                education.save()
-
-            # Experience
+            Experience.objects.filter(doctor=doctor).delete()
             for i in range(len(hospital_name)):
-                experience = Experience(doctor=doctor)
-                experience.work_place_name = hospital_name[i]
-                experience.from_year = start_year[i]
-                experience.to_year = end_year[i]
-                experience.designation = designation[i]
+                experience = Experience(
+                    doctor=doctor,
+                    work_place_name=hospital_name[i],
+                    from_year=start_year[i],
+                    to_year=end_year[i],
+                    designation=designation[i]
+                )
                 experience.save()
-      
-            # context = {'degree': degree}
-            messages.success(request, 'Profile Updated')
+            print(f"🏥 Experience details updated for doctor: {request.user.username}")
+
+            messages.success(request, 'Profile Updated 🎉')
             return redirect('doctor-dashboard')
     else:
-        redirect('doctor-logout')
+        print(f"⚠️ Unauthorized access attempt by user: {request.user.username}")
+        return redirect('doctor-logout')
                
 @csrf_exempt    
 @login_required(login_url="doctor-login")      

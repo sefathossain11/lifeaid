@@ -59,7 +59,7 @@
             <div class="banner-header text-center">
               <h1>Welcome To LIFEAID</h1>
               <p>
-                Choose well by choosing us.
+                Aid For Life.Health For All.
               </p>
             </div>
 
@@ -166,93 +166,7 @@
       <!-- Clinic and Specialities -->
 
       <!-- Popular Section -->
-      <section class="section section-doctor">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-lg-4">
-              <div class="section-header">
-                <h2>Book Our Doctor</h2>
-                <p>From the Best</p>
-              </div>
-              <div class="about-content">
-                <p>
-                  You can book doctors from any hospital from here.
-                </p>
-                <!-- <p>
-                  web page editors now use Lorem Ipsum as their default model
-                  text, and a search for 'lorem ipsum' will uncover many web
-                  sites still in their infancy. Various versions have evolved
-                  over the years, sometimes
-                </p> -->
-                <!-- <a href="javascript:;">Read More..</a> -->
-              </div>
-            </div>
-
-
-            <div class="col-lg-8">
-              <div class="doctor-slider slider">
-
-                {% for doctor in doctors %}
-                <!-- Doctor Widget -->
-                <div class="profile-widget">
-                  <div class="doc-img">
-                    <a href="#">
-                      <img
-                        class="img-fluid"
-                        alt="User Image"
-                        src="{{ doctor.featured_image.url }}"
-                      />
-                    </a>
-                    <a href="javascript:void(0)" class="fav-btn">
-                      <i class="far fa-bookmark"></i>
-                    </a>
-                  </div>
-                  <div class="pro-content">
-                    <h3 class="title">
-                      <a href="doctor-profile.html">{{doctor.name}}</a>
-                      <i class="fas fa-check-circle verified"></i>
-                    </h3>
-                    <p class="speciality">
-                      {{ doctor.department_name.hospital_department_name }}
-                    </p>
-                    {% comment %} <div class="rating">
-                      <i class="fas fa-star filled"></i>
-                      <i class="fas fa-star filled"></i>
-                      <i class="fas fa-star filled"></i>
-                      <i class="fas fa-star filled"></i>
-                      <i class="fas fa-star filled"></i>
-                      <span class="d-inline-block average-rating">(17)</span>
-                    </div> {% endcomment %}
-                    <ul class="available-info">
-                      <li>
-                        <i class="fas fa-map-marker-alt"></i> {{doctor.hospital_name}}
-                      </li>
-                      <li>
-                        <i class="far fa-clock"></i> {{ doctor.visiting_hour }}
-                      </li>
-                      <li>
-                        <i class="far fa-money-bill-alt"></i> Consulation fee: {{ doctor.consultation_fee }} BDT
-                        <i
-                          class="fas fa-info-circle"
-                          data-toggle="tooltip"
-                          title="Lorem Ipsum"
-                        ></i>
-                      </li>
-                    </ul>
-                    
-                  </div>
-                </div>
-                <!-- /Doctor Widget -->
-                {% endfor %}
-
-
-               
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
+      
       <!-- /Popular Section -->
 
       <!-- Availabe Features -->
@@ -268,7 +182,7 @@
             </div>
             <div class="col-md-7">
               <div class="section-header">
-                <h2 class="mt-2">Availabe Hospitals</h2>
+                <h2 class="mt-2">Who We Collaborate With</h2>
                 <p>
                   Here You can access multiple hospitals. You can book your appointment from
                   your doctor & can collect all hospital infromations from here.

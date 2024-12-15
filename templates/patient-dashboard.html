@@ -39,6 +39,14 @@
       href="{% static 'HealthStack-System/css/Normal/style.css' %}"
     />
 
+    <!-- Custom CSS for Disabled Button -->
+    <style>
+      .btn-disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+      }
+    </style>
+
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="assets/js/html5shiv.min.js"></script>
@@ -56,7 +64,6 @@
       <div class="breadcrumb-bar">
         <div class="container-fluid">
           <div class="row align-items-center">
-            
             <div class="col-md-12 col-12">
               <nav aria-label="breadcrumb" class="page-breadcrumb">
                 <ol class="breadcrumb">
@@ -68,9 +75,9 @@
                   </li>
                 </ol>
               </nav>
-              <h2 class="breadcrumb-title">Patient Dashboard</h2>{% include 'message.html' %}
+              <h2 class="breadcrumb-title">Patient Dashboard</h2>
+              {% include 'message.html' %}
             </div>
-
           </div>
         </div>
       </div>
@@ -165,12 +172,12 @@
                                           alt="User Image"
                                         />
                                       </a>
-                                      <a href="doctor-profile.html"
-                                        >{{ appointment.doctor.name }}
+                                      <a href="doctor-profile.html">
+                                        {{ appointment.doctor.name }}
                                         <span
                                           >{{appointment.doctor.department_name}}</span
-                                        ></a
-                                      >
+                                        >
+                                      </a>
                                     </h2>
                                   </td>
                                   <td>
@@ -189,33 +196,38 @@
                                   <td>
                                     {% if appointment.appointment_status == 'pending' %}
                                     <span class="badge badge-pill bg-warning-light">Pending</span>
-                                    {% endif %}
-                                    {% if appointment.appointment_status == 'confirmed' %}
+                                    {% elif appointment.appointment_status == 'confirmed' %}
                                     <span class="badge badge-pill bg-success-light">Confirm</span>
-                                    {% endif %}
-                                    {% if appointment.appointment_status == 'cancelled' %}
+                                    {% elif appointment.appointment_status == 'cancelled' %}
                                     <span class="badge badge-pill bg-danger-light">Cancelled</span>
                                     {% endif %}
                                   </td>
                                   <td class="text-center">
                                     {% if appointment.payment_status == 'pending' %}
                                     <span class="badge badge-pill bg-warning-light">Pending</span>
-                                    {% endif %}
-                                    {% if appointment.payment_status == 'VALID' %}
+                                    {% elif appointment.payment_status == 'VALID' %}
                                     <span class="badge badge-pill bg-success-light">Paid</span>
+                                    {% else %}
+                                    <span class="badge badge-pill bg-warning-light">Pending</span>
                                     {% endif %}
                                   </td>
 
-                                  <td >
+                                  <td>
                                     <div class="table-action">
+                                      {% if appointment.payment_status == 'VALID' %}
+                                      <!-- Disabled Pay Now button -->
+                                      <button class="btn btn-sm bg-success-light btn-disabled" disabled>
+                                        <i class="fas fa-dollar-sign"></i> Pay Now
+                                      </button>
+                                      {% else %}
+                                      <!-- Active Pay Now button -->
                                       <a
                                         href="{% url 'ssl-payment-request' pk=appointment.patient.patient_id id=appointment.id %}"
                                         class="btn btn-sm bg-success-light"
                                       >
-                                        <i class="fas fa-dollar-sign"></i> Pay
-                                        Now
+                                        <i class="fas fa-dollar-sign"></i> Pay Now
                                       </a>
-                                      
+                                      {% endif %}
                                     </div>
                                   </td>
                                 </tr>
@@ -255,7 +267,6 @@
 
                                   <!-- <td><a href="#">dental-test.pdf</a></td> -->
 
-                               
 
                                   <td>
                                     <h2 class="table-avatar">
@@ -269,9 +280,10 @@
                                           alt="User Image"
                                         />
                                       </a>
-                                      <a href="doctor-profile.html"
-                                        >Dr. {{prescription.doctor}}<span>{{prescription.doctor.department_name }}</span></a
-                                      >
+                                      <a href="doctor-profile.html">
+                                        Dr. {{prescription.doctor}}
+                                        <span>{{prescription.doctor.department_name }}</span>
+                                      </a>
                                     </h2>
                                   </td>
                                   <td>
@@ -294,7 +306,7 @@
                     </div>
                     <!-- /Prescription Tab -->
 
-                    <!-- medical record -->
+                    <!-- Medical Record Tab -->
                     <div id="pat_medical_records" class="tab-pane fade">
                       <div class="card card-table mb-0">
                         <div class="card-body">
@@ -307,7 +319,6 @@
 
                                   <!-- <th>Attachment</th> -->
 
-                                 
 
                                   <th>Doctor</th>
                                   <th>Action</th>
@@ -324,7 +335,6 @@
 
                                   <!-- <td><a href="#">dental-test.pdf</a></td> -->
 
-                               
 
                                   <td>
                                     <h2 class="table-avatar">
@@ -338,9 +348,10 @@
                                           alt="User Image"
                                         />
                                       </a>
-                                      <a href="doctor-profile.html"
-                                        >Dr.{{report.doctor}}<span>{{report.doctor.department_name }}</span></a
-                                      >
+                                      <a href="doctor-profile.html">
+                                        Dr.{{report.doctor}}
+                                        <span>{{report.doctor.department_name }}</span>
+                                      </a>
                                     </h2>
                                   </td>
                                   <td class="text-right">
@@ -352,9 +363,8 @@
                                         <i class="far fa-eye"></i> View
                                       </a>
                                       <a href="{% url 'delete-report' pk=report.report_id %}" onclick="return confirm('Are you sure you want to Delete?');" class="btn btn-sm bg-danger-light" >
-                                        <i class="fas fa-trash"></i> Delete <td>
+                                        <i class="fas fa-trash"></i> Delete
                                       </a>
-                                      
                                     </div>
                                   </td>
                                 </tr>
@@ -382,7 +392,6 @@
                                   <th>Card Type</th>
                                   <th>Card Issuer</th>
                                   <th>Payment Status</th>
-                      
                                 </tr>
                               </thead>
                               <tbody>
@@ -401,9 +410,10 @@
                                           alt="User Image"
                                         />
                                       </a>
-                                      <a href="doctor-profile.html"
-                                        >{{payment.appointment.doctor.name}} <span>{{payment.appointment.doctor.department}}</span></a
-                                      >
+                                      <a href="doctor-profile.html">
+                                        {{payment.appointment.doctor.name}} 
+                                        <span>{{payment.appointment.doctor.department}}</span>
+                                      </a>
                                     </h2>
                                   </td>
                                   <td>{{payment.transaction_id}}</td>
@@ -418,12 +428,9 @@
                                     <span class="badge badge-pill bg-warning-light">Pending</span>
                                     {% endif %}
                                   </td>
-                            
                                 </tr>
                                 {% endfor %}
-                          
-                             
-
+                              
 
                               </tbody>
                             </table>
@@ -447,26 +454,6 @@
       <!-- /Footer -->
     </div>
     <!-- /Main Wrapper -->
-    <!-- <div class="modal fade" id="delete_modal" aria-hidden="true" role="dialog">
-      <div class="modal-dialog modal-dialog-centered text-center" role="document" >
-        <div class="modal-content">
-        	<div class="modal-header">
-            <h5 class="modal-title">Delete</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="form-content p-2">
-              <h4 class="modal-title">Delete</h4>
-              <p class="mb-4">Are you sure want to delete?</p>
-              <button type="button" class="btn btn-primary">Save </button>
-              <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
 
     <!-- jQuery -->
     <script src="{% static 'HealthStack-System/js/Normal/jquery.min.js' %}"></script>
@@ -493,9 +480,7 @@
             });
         {% endfor %}
     </script>
-  {% endif %}
-
-
+    {% endif %}
 
   </body>
 
